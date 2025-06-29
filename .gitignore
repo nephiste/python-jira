@@ -1,0 +1,17 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtualenv
+venv/
+.venv/
+
+# pytest cache i raporty coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Folder instancji (SQLite, config) i pliki bazy
+instance/
+*.db

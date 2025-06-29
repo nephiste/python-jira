@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Python JIRA – Panel Użytkownika</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body { padding: 2rem; }
+    .card { margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4" id="main-navbar" style="display: none;">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">JIRA</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Strona główna</a></li>
+          <li class="nav-item"><a class="nav-link" href="statistics.html">Statystyki</a></li>
+        </ul>
+        <span class="navbar-text me-3" id="navbar-user-info"></span>
+        <button class="btn btn-outline-danger btn-sm" id="navbar-logout-btn" style="display: none;">Wyloguj</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="row" id="auth-forms">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">Rejestracja</div>
+        <div class="card-body">
+          <form id="register-form">
+            <input type="text" class="form-control mb-2" id="reg-username" placeholder="Nazwa użytkownika" required>
+            <input type="email" class="form-control mb-2" id="reg-email" placeholder="Email" required>
+            <input type="password" class="form-control mb-2" id="reg-password" placeholder="Hasło" required>
+            <button type="submit" class="btn btn-primary">Zarejestruj</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">Logowanie</div>
+        <div class="card-body">
+          <form id="login-form">
+            <input type="text" class="form-control mb-2" id="log-username" placeholder="Nazwa użytkownika" required>
+            <input type="password" class="form-control mb-2" id="log-password" placeholder="Hasło" required>
+            <button type="submit" class="btn btn-success">Zaloguj</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-4" id="project-form-card" style="display: none;">
+    <div class="card-header">Utwórz nowy projekt</div>
+    <div class="card-body">
+      <form id="project-form">
+        <input type="text" class="form-control mb-2" id="project-name" placeholder="Nazwa projektu" required>
+        <input type="text" class="form-control mb-2" id="project-desc" placeholder="Opis projektu">
+        <button type="submit" class="btn btn-primary">Utwórz projekt</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card mt-4" id="project-list" style="display:none">
+    <div class="card-header">Twoje projekty</div>
+    <ul class="list-group list-group-flush" id="projects-container"></ul>
+  </div>
+
+  <div id="output" class="mt-4"></div>
+</div>
+
+<script>
+let currentUser = JSON.parse(localStorage.getItem('user')) || null;
+
+const navbar = document.getElementById('main-navbar');
+const navbarLogoutBtn = document.getElementById('navbar-logout-btn');
+const navbarUserInfo = document.getElementById('navbar-user-info');
+const authForms = document.getElementById('auth-forms');
+
+const register_form = document.getElementById('register-form');
+const login_form = document.getElementById('login-form');
+const project_form = document.getElementById('project-form');
+const projectFormCard = document.getElementById('project-form-card');
+const projectsContainer = document.getElementById('projects-container');
+const projectListCard = document.getElementById('project-list');
+
+navbarLogoutBtn.onclick = logout;
+
+function printResponse(data) {
+  document.getElementById('output').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+}
+
+function updateUI() {
+  const isLoggedIn = currentUser !== null;
+  navbar.style.display = isLoggedIn ? 'block' : 'none';
+  navbarLogoutBtn.style.display = isLoggedIn ? 'inline-block' : 'none';
+  navbarUserInfo.textContent = isLoggedIn ? `Zalogowany jako: ${currentUser.username}` : '';
+  authForms.style.display = isLoggedIn ? 'none' : 'flex';
+  projectFormCard.style.display = isLoggedIn ? 'block' : 'none';
+  if (isLoggedIn) fetchProjects();
+}
+
+function logout() {
+  currentUser = null;
+  localStorage.removeItem('user');
+  updateUI();
+  printResponse({ message: "Wylogowano" });
+  projectsContainer.innerHTML = '';
+  projectListCard.style.display = 'none';
+}
+
+register_form.onsubmit = async (e) => {
+  e.preventDefault();
+  const res = await fetch('/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      username: document.getElementById('reg-username').value,
+      email: document.getElementById('reg-email').value,
+      password: document.getElementById('reg-password').value
+    })
+  });
+  printResponse(await res.json());
+};
+
+login_form.onsubmit = async (e) => {
+  e.preventDefault();
+  const res = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      username: document.getElementById('log-username').value,
+      password: document.getElementById('log-password').value
+    })
+  });
+  const data = await res.json();
+  if (res.ok) {
+    currentUser = { username: document.getElementById('log-username').value, id: data.user_id || 1 };
+    localStorage.setItem('user', JSON.stringify(currentUser));
+  }
+  updateUI();
+  printResponse(data);
+};
+
+project_form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('project-name').value;
+  const desc = document.getElementById('project-desc').value;
+
+  const res = await fetch('/api/projects/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name,
+      description: desc,
+      owner_id: currentUser.id
+    })
+  });
+
+  const data = await res.json();
+  printResponse(data);
+  if (res.ok) {
+    project_form.reset();
+    fetchProjects();
+  }
+});
+
+async function fetchProjects() {
+  const res = await fetch(`/api/projects/${currentUser.id}`);
+  const projects = await res.json();
+  projectsContainer.innerHTML = '';
+  projects.forEach(p => {
+    const li = document.createElement('li');
+    li.className = 'list-group-item';
+    li.innerHTML = `
+      <a href="project.html?id=${p.id}" class="text-decoration-none">
+        <strong>${p.name}</strong>
+      </a><br>
+      <small>${p.description}</small><br>
+      <span class='text-muted'>ID: ${p.id}, Utworzono: ${new Date(p.created_at).toLocaleDateString()}</span>
+    `;
+    projectsContainer.appendChild(li);
+  });
+  projectListCard.style.display = projects.length > 0 ? 'block' : 'none';
+}
+
+updateUI();
+</script>
+</body>
+</html>

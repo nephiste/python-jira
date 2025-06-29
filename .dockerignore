@@ -1,0 +1,40 @@
+# pliki cache Pythona
+__pycache__/
+*.py[cod]
+
+# wirtualne środowiska
+venv/
+env/
+.venv/
+
+# cache pytest
+.pytest_cache/
+
+# raporty pokrycia
+htmlcov/
+.coverage
+
+# folder z danymi instancji (SQLite, konfiguracje)
+instance/
+
+# katalog z testami – nie pakujemy ich do obrazu
+tests/
+
+# pliki IDE / edytora
+.idea/
+.vscode/
+*.swp
+
+# logi i pliki baz danych
+*.log
+*.db
+
+# migracje bazy (można je trzymać w repo, ale nie w obrazie)
+migrations/
+
+# pliki konfiguracyjne CI i Compose – są w repo, ale nie kopiujemy ich do obrazu
+.coveragerc
+docker-compose.yml
+
+# nie kopiujemy ponownie listy zależności
+requirements.txt

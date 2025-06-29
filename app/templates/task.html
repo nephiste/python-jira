@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Zadanie - Szczegóły</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body { padding: 2rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="mb-4">Szczegóły Zadania</h1>
+
+    <div id="task-details"></div>
+
+    <div class="card mt-4" id="status-section">
+        <div class="card-header">Zmień status zadania</div>
+        <div class="card-body">
+            <select class="form-select mb-2" id="status-select">
+                <option value="To Do">Do zrobienia</option>
+                <option value="In Progress">W trakcie</option>
+                <option value="Done">Zrobione</option>
+            </select>
+            <button class="btn btn-outline-primary" id="change-status-btn">Zmień status</button>
+        </div>
+    </div>
+
+    <div class="card mt-4" id="history-section">
+        <div class="card-header">Historia zmian statusu</div>
+        <ul class="list-group list-group-flush" id="status-history-list"></ul>
+    </div>
+
+    <div class="mt-4">
+        <h5>Komentarze</h5>
+        <ul class="list-group mb-3" id="comment-list"></ul>
+
+        <form id="comment-form" class="d-none">
+            <textarea id="comment-content" class="form-control mb-2" placeholder="Dodaj komentarz..."></textarea>
+            <button type="submit" class="btn btn-primary">Dodaj komentarz</button>
+        </form>
+    </div>
+
+    <a href="javascript:history.back()" class="btn btn-secondary mt-4">Powrót</a>
+</div>
+
+<script>
+const taskId = new URLSearchParams(window.location.search).get('id');
+let currentUser = { id: 1, username: "demo" }; // tymczasowo na sztywno
+
+async function fetchTask() {
+    const res = await fetch(`/api/tasks/${taskId}`);
+    const task = await res.json();
+    if (res.status !== 200 || task.error) {
+        document.getElementById('task-details').innerText = 'Nie znaleziono zadania.';
+        return;
+    }
+
+    document.getElementById('task-details').innerHTML = `
+        <div class="card">
+            <div class="card-body">
+                <h3>${task.title}</h3>
+                <p>${task.description || 'Brak opisu.'}</p>
+                <p>Status: <strong>${task.status}</strong> | Priorytet: ${task.priority}</p>
+                <small class="text-muted">Termin: ${task.deadline ? new Date(task.deadline).toLocaleDateString() : 'brak'}</small>
+            </div>
+        </div>
+    `;
+
+    // Ustawienie aktualnego statusu w select
+    const select = document.getElementById('status-select');
+    select.value = task.status;
+}
+
+async function fetchComments() {
+    const res = await fetch(`/api/comments/task/${taskId}`);
+    const comments = await res.json();
+    const list = document.getElementById('comment-list');
+    list.innerHTML = '';
+    comments.forEach(c => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+        li.innerHTML = `<strong>${c.author_name}</strong><br>${c.content}`;
+        list.appendChild(li);
+    });
+}
+
+document.getElementById('comment-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const content = document.getElementById('comment-content').value;
+    await fetch('/api/comments/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            task_id: taskId,
+            user_id: currentUser.id,
+            content: content
+        })
+    });
+    document.getElementById('comment-content').value = '';
+    fetchComments();
+});
+
+document.getElementById('change-status-btn').onclick = async () => {
+    const newStatus = document.getElementById('status-select').value;
+    const res = await fetch('/api/statuses/change', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            task_id: taskId,
+            new_status: newStatus,
+            changed_by_id: currentUser.id
+        })
+    });
+    const data = await res.json();
+    fetchTask();
+    fetchStatusHistory();
+};
+
+async function fetchStatusHistory() {
+    const res = await fetch(`/api/statuses/history/${taskId}`);
+    const history = await res.json();
+    const list = document.getElementById('status-history-list');
+    list.innerHTML = '';
+    history.forEach(entry => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+        li.innerText = `${entry.old_status} → ${entry.new_status} (zmienione przez: ${entry.changed_by_id}, dnia: ${new Date(entry.changed_at).toLocaleString()})`;
+        list.appendChild(li);
+    });
+}
+
+fetchTask();
+fetchComments();
+fetchStatusHistory();
+document.getElementById('comment-form').classList.remove('d-none');
+</script>
+</body>
+</html>

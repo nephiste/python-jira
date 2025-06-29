@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Projekt - Szczegóły</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body { padding: 2rem; }
+        .list-group-item.priority-high {
+            border-left: 6px solid #dc3545 !important;
+        }
+        .list-group-item.priority-medium {
+            border-left: 6px solid #fd7e14 !important;
+        }
+        .list-group-item.priority-low {
+            border-left: 6px solid #198754 !important;
+        }
+        .kanban-board {
+            display: flex;
+            gap: 1rem;
+        }
+        .kanban-column {
+            flex: 1;
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: .5rem;
+        }
+        .kanban-column h5 {
+            text-align: center;
+        }
+        .kanban-tasks {
+            min-height: 100px;
+        }
+        .drag-over {
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="mb-4">Szczegóły Projektu</h1>
+
+    <div id="project-details" class="mb-4"></div>
+
+    <div class="card mb-4" id="new-task-card" style="display: none;">
+        <div class="card-header">Dodaj nowe zadanie</div>
+        <div class="card-body">
+            <form id="task-form">
+                <input type="text" class="form-control mb-2" id="task-title" placeholder="Tytuł" required>
+                <input type="text" class="form-control mb-2" id="task-desc" placeholder="Opis">
+                <label for="task-deadline" class="form-label">Deadline (data zakończenia)</label>
+                <input type="date" class="form-control mb-2" id="task-deadline">
+                <div id="form-error" class="text-danger small mb-2" style="display: none;"></div>
+                <select class="form-select mb-2" id="task-priority">
+                    <option value="Low">Niski</option>
+                    <option value="Medium" selected>Średni</option>
+                    <option value="High">Wysoki</option>
+                </select>
+                <button type="submit" class="btn btn-success">Dodaj zadanie</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card" id="task-list">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Zadania w projekcie</span>
+            <div class="d-flex gap-2 align-items-center">
+                <select class="form-select form-select-sm" id="sort-select">
+                    <option value="default">Sortuj według...</option>
+                    <option value="priority">Priorytet</option>
+                    <option value="deadline">Deadline</option>
+                    <option value="status">Status</option>
+                </select>
+                <a id="export-btn" class="btn btn-sm btn-outline-secondary" href="#">Eksportuj CSV</a>
+            </div>
+        </div>
+        <div class="card-body kanban-board">
+            <div class="kanban-column">
+                <h5>To Do</h5>
+                <ul class="list-group kanban-tasks" id="todo-column" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'To Do')"></ul>
+            </div>
+            <div class="kanban-column">
+                <h5>In Progress</h5>
+                <ul class="list-group kanban-tasks" id="inprogress-column" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'In Progress')"></ul>
+            </div>
+            <div class="kanban-column">
+                <h5>Done</h5>
+                <ul class="list-group kanban-tasks" id="done-column" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'Done')"></ul>
+            </div>
+        </div>
+    </div>
+
+    <a href="index.html" class="btn btn-secondary mt-4">Powrót</a>
+</div>
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const projectId = urlParams.get('id');
+let currentUser = null;
+
+function allowDrop(ev) {
+    ev.preventDefault();
+    ev.currentTarget.classList.add('drag-over');
+}
+
+function handleDrop(ev, newStatus) {
+    ev.preventDefault();
+    const taskId = ev.dataTransfer.getData("text");
+    changeStatus(taskId, newStatus);
+    ev.currentTarget.classList.remove('drag-over');
+}
+
+function dragStart(ev, taskId) {
+    ev.dataTransfer.setData("text", taskId);
+}
+
+async function fetchProject() {
+    const res = await fetch(`/api/projects/get/${projectId}`);
+    const data = await res.json();
+    const container = document.getElementById('project-details');
+    container.innerHTML = `
+        <h2>${data.name}</h2>
+        <p>${data.description}</p>
+        <p class="text-muted">ID: ${data.id} | Utworzono: ${new Date(data.created_at).toLocaleDateString()} | Właściciel ID: ${data.owner_id}</p>
+    `;
+}
+
+async function fetchTasks() {
+    const res = await fetch(`/api/tasks/project/${projectId}`);
+    let tasks = await res.json();
+
+    document.getElementById('todo-column').innerHTML = '';
+    document.getElementById('inprogress-column').innerHTML = '';
+    document.getElementById('done-column').innerHTML = '';
+
+    tasks.forEach(t => {
+        let priorityClass = 'priority-low';
+        if (t.priority === 'High') priorityClass = 'priority-high';
+        else if (t.priority === 'Medium') priorityClass = 'priority-medium';
+
+        const li = document.createElement('li');
+        li.className = `list-group-item ${priorityClass}`;
+        li.draggable = true;
+        li.ondragstart = (e) => dragStart(e, t.id);
+        li.innerHTML = `
+            <div>
+                <a href="task.html?id=${t.id}" class="text-decoration-none"><strong>${t.title}</strong></a><br>
+                <small>Status: ${t.status} | Priorytet: ${t.priority}</small>
+            </div>
+        `;
+
+        if (t.status === 'To Do') document.getElementById('todo-column').appendChild(li);
+        else if (t.status === 'In Progress') document.getElementById('inprogress-column').appendChild(li);
+        else if (t.status === 'Done') document.getElementById('done-column').appendChild(li);
+    });
+}
+
+async function changeStatus(taskId, newStatus) {
+    await fetch('/api/statuses/change', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            task_id: taskId,
+            new_status: newStatus,
+            changed_by_id: currentUser?.id || 1
+        })
+    });
+    fetchTasks();
+}
+
+document.getElementById('task-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const deadlineValue = document.getElementById('task-deadline').value;
+    const today = new Date();
+    const errorBox = document.getElementById('form-error');
+    errorBox.style.display = 'none';
+    errorBox.innerText = '';
+
+    if (deadlineValue) {
+        const deadlineDate = new Date(deadlineValue);
+        if (deadlineDate < today.setHours(0, 0, 0, 0)) {
+            errorBox.style.display = 'block';
+            errorBox.innerText = 'Nie można ustawić deadline w przeszłości.';
+            return;
+        }
+    }
+
+    const res = await fetch('/api/tasks/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            title: document.getElementById('task-title').value,
+            description: document.getElementById('task-desc').value,
+            project_id: projectId,
+            created_by_id: currentUser?.id || 1,
+            assigned_to_id: currentUser?.id || 1,
+            deadline: deadlineValue,
+            priority: document.getElementById('task-priority').value
+        })
+    });
+
+    if (!res.ok) {
+        const data = await res.json();
+        errorBox.style.display = 'block';
+        errorBox.innerText = data.error || 'Wystąpił błąd podczas tworzenia zadania.';
+        return;
+    }
+
+    e.target.reset();
+    fetchTasks();
+});
+
+function checkUser() {
+    currentUser = JSON.parse(localStorage.getItem('user')) || { id: 1, username: 'demo' };
+    if (currentUser) document.getElementById('new-task-card').style.display = 'block';
+}
+
+document.getElementById('export-btn').href = `/api/tasks/export/project/${projectId}`;
+document.getElementById('export-btn').setAttribute('download', '');
+
+document.getElementById('sort-select').addEventListener('change', fetchTasks);
+
+checkUser();
+fetchProject();
+fetchTasks();
+</script>
+</body>
+</html>

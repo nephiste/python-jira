@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Historia Statusów</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body { padding: 2rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="mb-4">Historia zmiany statusów</h1>
+
+    <form id="status-history-form" class="mb-3">
+        <input type="number" id="task-id" class="form-control" placeholder="ID zadania" required>
+        <button class="btn btn-primary mt-2" type="submit">Pokaż historię</button>
+    </form>
+
+    <ul class="list-group" id="history-list"></ul>
+
+    <div class="card mt-5">
+        <div class="card-header">Zmień status zadania</div>
+        <div class="card-body">
+            <form id="change-status-form">
+                <input type="number" id="change-task-id" class="form-control mb-2" placeholder="ID zadania" required>
+                <select id="new-status" class="form-select mb-2">
+                    <option value="To Do">To Do</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Done">Done</option>
+                </select>
+                <input type="number" id="changer-id" class="form-control mb-2" placeholder="ID zmieniającego" required>
+                <button type="submit" class="btn btn-success">Zmień status</button>
+            </form>
+        </div>
+    </div>
+
+    <a href="index.html" class="btn btn-secondary mt-4">Powrót</a>
+</div>
+
+<script>
+document.getElementById('status-history-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const taskId = document.getElementById('task-id').value;
+    const res = await fetch(`/api/statuses/history/${taskId}`);
+    const history = await res.json();
+
+    const list = document.getElementById('history-list');
+    list.innerHTML = '';
+
+    history.forEach(h => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+        li.innerHTML = `
+            <strong>${h.old_status}</strong> ➔ <strong>${h.new_status}</strong><br>
+            Użytkownik ID: ${h.changed_by_id} | Data: ${new Date(h.changed_at).toLocaleString()}
+        `;
+        list.appendChild(li);
+    });
+});
+
+document.getElementById('change-status-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const taskId = document.getElementById('change-task-id').value;
+    const newStatus = document.getElementById('new-status').value;
+    const changerId = document.getElementById('changer-id').value;
+
+    const res = await fetch('/api/statuses/change', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            task_id: taskId,
+            new_status: newStatus,
+            changed_by_id: changerId
+        })
+    });
+
+    const result = await res.json();
+    alert(result.message || 'Status zmieniony');
+});
+</script>
+</body>
+</html>

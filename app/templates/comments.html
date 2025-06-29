@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Komentarze do zadań</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body { padding: 2rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="mb-4">Komentarze do zadań</h1>
+
+    <form id="search-form" class="mb-3">
+        <input type="number" id="task-id-input" class="form-control" placeholder="ID zadania">
+        <button type="submit" class="btn btn-primary mt-2">Pokaż komentarze</button>
+    </form>
+
+    <div id="comments-section">
+        <ul class="list-group" id="comments-list"></ul>
+    </div>
+
+    <div class="mt-4 d-none" id="comment-form-wrapper">
+        <h5>Dodaj komentarz</h5>
+        <form id="comment-form">
+            <textarea class="form-control mb-2" id="comment-content" placeholder="Treść komentarza..."></textarea>
+            <button class="btn btn-success" type="submit">Dodaj</button>
+        </form>
+    </div>
+
+    <a href="index.html" class="btn btn-secondary mt-4">Powrót</a>
+</div>
+
+<script>
+let currentUser = { id: 1, username: "demo" }; // lub dynamicznie
+let currentTaskId = null;
+
+const commentsList = document.getElementById('comments-list');
+const commentForm = document.getElementById('comment-form');
+const commentWrapper = document.getElementById('comment-form-wrapper');
+const searchForm = document.getElementById('search-form');
+
+searchForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const taskId = document.getElementById('task-id-input').value;
+    if (!taskId) return;
+    currentTaskId = taskId;
+    await loadComments(taskId);
+    commentWrapper.classList.remove('d-none');
+});
+
+commentForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const content = document.getElementById('comment-content').value;
+    const res = await fetch('/api/comments/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            task_id: currentTaskId,
+            user_id: currentUser.id,
+            content
+        })
+    });
+    document.getElementById('comment-content').value = '';
+    await loadComments(currentTaskId);
+});
+
+async function loadComments(taskId) {
+    const res = await fetch(`/api/comments/task/${taskId}`);
+    const comments = await res.json();
+    commentsList.innerHTML = '';
+    comments.forEach(c => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+        li.innerHTML = `<strong>Użytkownik ${c.author_id}</strong><br>${c.content}`;
+        commentsList.appendChild(li);
+    });
+}
+</script>
+</body>
+</html>
