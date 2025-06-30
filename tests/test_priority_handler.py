@@ -21,7 +21,7 @@ def ph():
     ("Low", "Low"),
     ("  LOW  ", "Low"),
     ("unknown", "Medium"),  # domyślnie Medium, gdy nieznany tekst
-    ("", "Medium"),        # puste → domyślny medium
+    ("", "Medium"),        # puste -> domyślny medium
 ])
 
 def test_normalize_priority(ph, input_str, expected):
