@@ -1,4 +1,4 @@
-## Python JIRA – System zarządzania projektami i zadaniami
+# Python JIRA – System zarządzania projektami i zadaniami
 
 Aplikacja webowa inspirowana JIRA, napisana we Flasku z bazą danych SQLite. Umożliwia zarządzanie użytkownikami, projektami, zadaniami, komentarzami oraz eksportem danych. Gotowa do uruchomienia lokalnie lub przez Docker.
 
@@ -7,7 +7,7 @@ Aplikacja webowa inspirowana JIRA, napisana we Flasku z bazą danych SQLite. Umo
 - Python 3.9
 - Flask + SQLAlchemy
 - SQLite
-- Bootstrap 5 + JavaScrip
+- Bootstrap 5 + JavaScript
 - Docker & Docker Compose
 - Pytest + Mock (testy jednostkowe)
 
@@ -15,11 +15,16 @@ Aplikacja webowa inspirowana JIRA, napisana we Flasku z bazą danych SQLite. Umo
 
 ## Instrukcja uruchomienia z Docker:
 
-W katalogu głównym projektu uruchom:
+Uruchom Docker. Następnie w katalogu głównym projektu wykonaj polecenia:
 
 ```bash
 docker-compose build
-docker-compose up
+docker-compose up -d
+
+# inicjalizacja bazy danych (pierwsze uruchomienie)
+docker-compose exec web flask db init
+docker-compose exec web flask db migrate -m "Initial migration."
+docker-compose exec web flask db upgrade
 ```
 
 Aplikacja będzie dostępna pod adresem:
@@ -27,7 +32,7 @@ Aplikacja będzie dostępna pod adresem:
 
 ---
 
-##  Instrukcja uruchomienia lokalnego
+## Instrukcja uruchomienia lokalnego:
 
 1. **Klonuj repozytorium**:
 
@@ -70,13 +75,16 @@ Aplikacja będzie dostępna pod adresem:
 
 ---
 
-## Testy
+## Testy jednostkowe i pokrycie kodu:
 
-Aby uruchomić testy i sprawdzić pokrycie:
+Aby uruchomić testy i sprawdzić pokrycie kodu:
 
 ```bash
 pytest
+
 coverage run -m pytest
 coverage report
-coverage html # wygeneruj plik html
+coverage html # wygenerowanie raportu HTML
 ```
+
+Raport pokrycia będzie dostępny w katalogu `htmlcov/index.html`.

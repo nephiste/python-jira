@@ -15,3 +15,6 @@ htmlcov/
 # Folder instancji (SQLite, config) i pliki bazy
 instance/
 *.db
+
+# Baza dockerowa
+migrations/
