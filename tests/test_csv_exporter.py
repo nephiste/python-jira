@@ -54,7 +54,7 @@ def test_export_tasks_for_project_no_tasks(mocker, exporter, fixed_dt):
         return_value=proj_query
     )
 
-    # Task.query.filter_by(...).all() → []
+    # Task.query.filter_by(...).all() -> []
     task_query = Mock(filter_by=Mock(return_value=Mock(all=Mock(return_value=[]))))
     mocker.patch(
         "app.services.csv_exporter.Task.query",
