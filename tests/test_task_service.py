@@ -154,7 +154,7 @@ def test_get_tasks_by_project(mocker, task_service):
 
 def test_get_task_by_id_found(mocker, task_service):
     """
-    Testuje get_task_by_id: istniejące ID → zwraca Task
+    Testuje get_task_by_id: istniejące ID -> zwraca Task
     """
     mock_task = Mock()
     query = Mock(get=Mock(return_value=mock_task))
@@ -168,7 +168,7 @@ def test_get_task_by_id_found(mocker, task_service):
 
 def test_get_task_by_id_not_found(mocker, task_service):
     """
-    Testuje get_task_by_id: brak zadania → None
+    Testuje get_task_by_id: brak zadania -> None
     """
     query = Mock(get=Mock(return_value=None))
     mocker.patch(
@@ -181,7 +181,7 @@ def test_get_task_by_id_not_found(mocker, task_service):
 
 def test_update_task_not_found(task_service):
     """
-    Testuje update_task: brak zadania → zwraca None
+    Testuje update_task: brak zadania -> zwraca None
     """
     task_service.get_task_by_id = lambda x: None
     assert task_service.update_task(1, {}) is None
@@ -189,7 +189,7 @@ def test_update_task_not_found(task_service):
 
 def test_update_task_success(patch_db_and_validator, mocker, task_service):
     """
-    Testuje update_task: poprawne dane → aktualizacja pól i commit
+    Testuje update_task: poprawne dane -> aktualizacja pól i commit
     """
     mock_task = Mock(
         title="A",
@@ -214,7 +214,7 @@ def test_update_task_success(patch_db_and_validator, mocker, task_service):
 
 def test_update_task_invalid_date_format(task_service, mocker):
     """
-    Testuje update_task: niepoprawny format daty → ValueError
+    Testuje update_task: niepoprawny format daty -> ValueError
     """
     mock_task = Mock()
     mocker.patch.object(task_service, "get_task_by_id", return_value=mock_task)
@@ -224,7 +224,7 @@ def test_update_task_invalid_date_format(task_service, mocker):
 
 def test_update_task_past_deadline(patch_db_and_validator, mocker, task_service):
     """
-    Testuje update_task: validator uważa datę za przeszłą → ValueError o formacie (aktualne zachowanie)
+    Testuje update_task: validator uważa datę za przeszłą -> ValueError o formacie (aktualne zachowanie)
     """
     patch_db_and_validator["validator"].is_valid_deadline.return_value = False
     mock_task = Mock(deadline=None)
@@ -235,7 +235,7 @@ def test_update_task_past_deadline(patch_db_and_validator, mocker, task_service)
 
 def test_delete_task_success(mocker, task_service, patch_db_and_validator):
     """
-    Testuje delete_task: istniejące zadanie → usuwa i commit
+    Testuje delete_task: istniejące zadanie -> usuwa i commit
     """
     mock_task = Mock()
     mocker.patch.object(task_service, "get_task_by_id", return_value=mock_task)
@@ -246,7 +246,7 @@ def test_delete_task_success(mocker, task_service, patch_db_and_validator):
 
 def test_delete_task_not_found(task_service):
     """
-    Testuje delete_task: brak zadania → zwraca False
+    Testuje delete_task: brak zadania -> zwraca False
     """
     task_service.get_task_by_id = lambda x: None
     assert task_service.delete_task(99) is False
