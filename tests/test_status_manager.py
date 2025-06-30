@@ -58,7 +58,7 @@ def test_change_status_success(mocker, status_manager, patch_db):
 
 def test_change_status_task_not_found(mocker, status_manager):
     """
-    Testuje change_status: brak zadania → ValueError
+    Testuje change_status: brak zadania -> ValueError
     """
     query = Mock(get=Mock(return_value=None))
     mocker.patch(
@@ -75,7 +75,7 @@ def test_change_status_task_not_found(mocker, status_manager):
 
 def test_change_status_rollback_on_update_error(mocker, status_manager, patch_db):
     """
-    Testuje change_status: błąd pierwszego commit → rollback
+    Testuje change_status: błąd pierwszego commit -> rollback
     """
     mock_task = Mock(status="A")
     query = Mock(get=Mock(return_value=mock_task))
@@ -102,7 +102,7 @@ def test_change_status_rollback_on_update_error(mocker, status_manager, patch_db
 
 def test_change_status_rollback_on_history_error(mocker, status_manager, patch_db):
     """
-    Testuje change_status: pierwszy commit OK, drugi rzuca → rollback
+    Testuje change_status: pierwszy commit OK, drugi rzuca -> rollback
     """
     mock_task = Mock(status="X")
     query = Mock(get=Mock(return_value=mock_task))
