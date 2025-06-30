@@ -47,7 +47,7 @@ def test_register_user_success(mocker, user_service, mock_db):
 
 def test_register_user_missing_fields(user_service):
     """
-    Testuje register_user: brak któregokolwiek pola → ValueError
+    Testuje register_user: brak któregokolwiek pola -> ValueError
     """
     with pytest.raises(ValueError, match="Wszystkie pola są wymagane"):
         user_service.register_user("", "a@b.com", "p")
@@ -59,7 +59,7 @@ def test_register_user_missing_fields(user_service):
 
 def test_register_user_duplicate(mocker, user_service):
     """
-    Testuje register_user: istnieje już user o tej samej nazwie lub emailu → ValueError
+    Testuje register_user: istnieje już user o tej samej nazwie lub emailu -> ValueError
     """
     mocker.patch(
         "app.services.user_service.User.query.filter",
@@ -71,7 +71,7 @@ def test_register_user_duplicate(mocker, user_service):
 
 def test_register_user_db_error(mocker, user_service):
     """
-    Testuje register_user: commit rzuca IntegrityError → rollback + ValueError
+    Testuje register_user: commit rzuca IntegrityError -> rollback + ValueError
     """
     # brak duplikatu
     filter_mock = mocker.Mock()
@@ -91,7 +91,7 @@ def test_register_user_db_error(mocker, user_service):
 
 def test_authenticate_user_success(mocker, user_service):
     """
-    Testuje authenticate_user: poprawne hasło → zwraca user
+    Testuje authenticate_user: poprawne hasło -> zwraca user
     """
     mock_user = mocker.Mock()
     mock_user.check_password.return_value = True
@@ -112,7 +112,7 @@ def test_authenticate_user_success(mocker, user_service):
 
 def test_authenticate_user_wrong_password(mocker, user_service):
     """
-    Testuje authenticate_user: błędne hasło → None
+    Testuje authenticate_user: błędne hasło -> None
     """
     mock_user = Mock(check_password=Mock(return_value=False))
     mocker.patch(
@@ -124,7 +124,7 @@ def test_authenticate_user_wrong_password(mocker, user_service):
 
 def test_authenticate_user_not_found(mocker, user_service):
     """
-    Testuje authenticate_user: brak usera → None
+    Testuje authenticate_user: brak usera -> None
     """
     mocker.patch(
         "app.services.user_service.User.query.filter_by",
@@ -135,7 +135,7 @@ def test_authenticate_user_not_found(mocker, user_service):
 
 def test_get_user_by_id_found(mocker, user_service):
     """
-    Testuje get_user_by_id: istniejący ID → zwraca user
+    Testuje get_user_by_id: istniejący ID -> zwraca user
     """
     mock_user = Mock()
     query_mock = Mock(get=Mock(return_value=mock_user))
@@ -149,7 +149,7 @@ def test_get_user_by_id_found(mocker, user_service):
 
 def test_get_user_by_id_not_found(mocker, user_service):
     """
-    Testuje get_user_by_id: brak usera → None
+    Testuje get_user_by_id: brak usera -> None
     """
     query_mock = Mock(get=Mock(return_value=None))
     mocker.patch(
@@ -176,7 +176,7 @@ def test_get_all_users(mocker, user_service):
 
 def test_delete_user_success(mocker, user_service, mock_db):
     """
-    Testuje delete_user: istniejący user → usuwa i zwraca True
+    Testuje delete_user: istniejący user -> usuwa i zwraca True
     """
     mock_user = Mock()
     mocker.patch.object(user_service, 'get_user_by_id', return_value=mock_user)
@@ -187,7 +187,7 @@ def test_delete_user_success(mocker, user_service, mock_db):
 
 def test_delete_user_not_found(mocker, user_service):
     """
-    Testuje delete_user: brak usera → False
+    Testuje delete_user: brak usera -> False
     """
     mocker.patch.object(user_service, 'get_user_by_id', return_value=None)
     assert user_service.delete_user(999) is False
