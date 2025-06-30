@@ -23,8 +23,14 @@ docker-compose up -d
 
 # inicjalizacja bazy danych (pierwsze uruchomienie)
 docker-compose exec web flask db init
-docker-compose exec web flask db migrate -m "Initial migration."
+docker-compose exec web flask db migrate -m \"Initial migration.\"
 docker-compose exec web flask db upgrade
+```
+
+Opcjonalnie, aby załadować przykładowe dane:
+
+```bash
+docker-compose exec web python seed.py
 ```
 
 Aplikacja będzie dostępna pod adresem:
@@ -60,8 +66,14 @@ pip install -r requirements.txt
 
 ```bash
 flask db init
-flask db migrate -m "initial"
+flask db migrate -m \"initial\"
 flask db upgrade
+```
+
+Opcjonalnie, aby załadować przykładowe dane:
+
+```bash
+python seed.py
 ```
 
 5. **Uruchom aplikację**:
