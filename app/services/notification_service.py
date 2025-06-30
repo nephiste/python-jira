@@ -16,7 +16,7 @@ class NotificationService:
             user_id,
             task_id,
             "status_changed",
-            extra=f"{old_status} → {new_status}"
+            extra=f"{old_status} -> {new_status}"
         )
 
     def send_comment_notification(self, user_id, task_id):
