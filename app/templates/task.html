@@ -125,7 +125,7 @@ async function fetchStatusHistory() {
     history.forEach(entry => {
         const li = document.createElement('li');
         li.className = 'list-group-item';
-        li.innerText = `${entry.old_status} → ${entry.new_status} (zmienione przez: ${entry.changed_by_id}, dnia: ${new Date(entry.changed_at).toLocaleString()})`;
+        li.innerText = `${entry.old_status} -> ${entry.new_status} (zmienione przez: ${entry.changed_by_id}, dnia: ${new Date(entry.changed_at).toLocaleString()})`;
         list.appendChild(li);
     });
 }
