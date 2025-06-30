@@ -3,7 +3,7 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# Inicjalizacja DB (np. w app/__init__.py)
+# Inicjalizacja DB
 db = SQLAlchemy()
 
 class User(db.Model):
