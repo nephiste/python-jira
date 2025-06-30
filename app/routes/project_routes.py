@@ -33,7 +33,6 @@ def list_projects(owner_id):
     ]
     return jsonify(result), 200
 
-# ✅ Nowy endpoint do pobierania pojedynczego projektu po ID:
 @project_bp.route('/get/<int:project_id>', methods=['GET'])
 def get_project_by_id(project_id):
     project = Project.query.get(project_id)
