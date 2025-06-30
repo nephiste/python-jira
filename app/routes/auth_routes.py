@@ -1,4 +1,3 @@
-# app/routes/auth_routes.py
 from flask import Blueprint, request, jsonify
 from app.models import db, User
 
