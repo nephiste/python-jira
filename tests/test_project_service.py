@@ -51,7 +51,7 @@ def test_create_project_default_description(patch_db_and_Project, project_servic
 
 def test_create_project_missing_fields(project_service):
     """
-    Testuje create_project: brak user_id lub nazwy → ValueError
+    Testuje create_project: brak user_id lub nazwy -> ValueError
     """
     with pytest.raises(ValueError, match="Brakuje wymaganych danych"):
         project_service.create_project(user_id=None, name="X", description="D")
@@ -61,7 +61,7 @@ def test_create_project_missing_fields(project_service):
 
 def test_create_project_db_error(patch_db_and_Project, project_service):
     """
-    Testuje create_project: commit rzuca wyjątek SQLAlchemyError → rollback + wyjątek
+    Testuje create_project: commit rzuca wyjątek SQLAlchemyError -> rollback + wyjątek
     """
     patch_db_and_Project["db"].session.commit.side_effect = SQLAlchemyError("fail")
     with pytest.raises(SQLAlchemyError):
@@ -82,7 +82,7 @@ def test_get_projects_by_owner(project_service):
 
 def test_get_project_by_id_found(project_service):
     """
-    Testuje get_project_by_id: istniejący projekt → zwraca obiekt
+    Testuje get_project_by_id: istniejący projekt -> zwraca obiekt
     """
     mock_proj = Mock()
     query = Mock(get=Mock(return_value=mock_proj))
@@ -93,7 +93,7 @@ def test_get_project_by_id_found(project_service):
 
 def test_get_project_by_id_not_found(project_service):
     """
-    Testuje get_project_by_id: brak projektu → zwraca None
+    Testuje get_project_by_id: brak projektu -> zwraca None
     """
     query = Mock(get=Mock(return_value=None))
     import app.services.project_service as ps_mod
@@ -103,7 +103,7 @@ def test_get_project_by_id_not_found(project_service):
 
 def test_update_project_not_found(project_service):
     """
-    Testuje update_project: brak projektu → None
+    Testuje update_project: brak projektu -> None
     """
     project_service.get_project_by_id = lambda x: None
     assert project_service.update_project(1, {"name": "X"}) is None
@@ -126,7 +126,7 @@ def test_update_project_success(patch_db_and_Project, project_service):
 
 def test_delete_project_success(patch_db_and_Project, project_service):
     """
-    Testuje delete_project: istniejący projekt → usuwa + commit
+    Testuje delete_project: istniejący projekt -> usuwa + commit
     """
     mock_proj = patch_db_and_Project["instance"]
     project_service.get_project_by_id = lambda x: mock_proj
@@ -137,7 +137,7 @@ def test_delete_project_success(patch_db_and_Project, project_service):
 
 def test_delete_project_not_found(project_service):
     """
-    Testuje delete_project: brak projektu → False
+    Testuje delete_project: brak projektu -> False
     """
     project_service.get_project_by_id = lambda x: None
     assert project_service.delete_project(999) is False
