@@ -52,7 +52,7 @@ document.getElementById('status-history-form').addEventListener('submit', async 
         const li = document.createElement('li');
         li.className = 'list-group-item';
         li.innerHTML = `
-            <strong>${h.old_status}</strong> ➔ <strong>${h.new_status}</strong><br>
+            <strong>${h.old_status}</strong> -> <strong>${h.new_status}</strong><br>
             Użytkownik ID: ${h.changed_by_id} | Data: ${new Date(h.changed_at).toLocaleString()}
         `;
         list.appendChild(li);
