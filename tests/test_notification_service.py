@@ -55,13 +55,13 @@ def test_send_task_assignment_notification(mocker):
 
 def test_send_status_change_notification(mocker):
     """
-    Testuje send_status_change_notification: deleguje z extra "old → new"
+    Testuje send_status_change_notification: deleguje z extra "old -> new"
     """
     svc = NotificationService()
     svc.log_notification = Mock()
     svc.send_status_change_notification(user_id=7, task_id=8, old_status="X", new_status="Y")
     svc.log_notification.assert_called_once_with(
-        7, 8, "status_changed", extra="X → Y"
+        7, 8, "status_changed", extra="X -> Y"
     )
 
 
