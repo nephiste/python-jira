@@ -37,7 +37,7 @@
 ### 4. StatisticsGenerator
 
 * task\_count\_by\_status: \[] zwraca {}
-* task\_count\_by\_status: lista statusów zwraca mapę status→liczba
+* task\_count\_by\_status: lista statusów zwraca mapę status->liczba
 * generate\_global\_stats: zwraca total\_tasks, total\_projects, status\_counts
 
 ### 5. ProjectService
@@ -54,7 +54,7 @@
 ### 6. PriorityHandler
 
 * normalize\_priority: różne warianty tekstu mapowane na High/Medium/Low
-* is\_valid\_priority: tylko Low/Medium/High → True
+* is\_valid\_priority: tylko Low/Medium/High -> True
 * compare\_priority: porównanie priorytetów -1/0/1
 
 ### 7. NotificationService
@@ -66,15 +66,15 @@
 
 ### 8. DeadlineValidator
 
-* is\_valid\_deadline: None → False
-* is\_valid\_deadline: nie-datetime → ValueError
-* is\_valid\_deadline: data < teraz → False; data >= teraz → True
+* is\_valid\_deadline: None -> False
+* is\_valid\_deadline: nie-datetime -> ValueError
+* is\_valid\_deadline: data < teraz -> False; data >= teraz -> True
 
 ### 9. CSVExporter
 
-* export\_tasks\_for\_project: brak projektu → None
-* export\_tasks\_for\_project: brak zadań → CSV z nagłówkiem i pustą sekcją
-* export\_tasks\_for\_project: zadania → CSV z danymi
+* export\_tasks\_for\_project: brak projektu -> None
+* export\_tasks\_for\_project: brak zadań -> CSV z nagłówkiem i pustą sekcją
+* export\_tasks\_for\_project: zadania -> CSV z danymi
 
 ### 10. CommentService
 
